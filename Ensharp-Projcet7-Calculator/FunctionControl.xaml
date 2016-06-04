@@ -27,7 +27,7 @@
         <Button x:Name="btn_c" Content="C" HorizontalAlignment="Left" Margin="115,99,0,0" VerticalAlignment="Top" Width="115" Height="60" FontFamily="BM DoHyeon" FontSize="20"/>
         <Button x:Name="btn_backspace" Content="←" HorizontalAlignment="Left" Margin="230,99,0,0" VerticalAlignment="Top" Width="115" Height="60" FontFamily="HYGothic-Extra" FontSize="15"/>
         <Button x:Name="btn_division" Content="÷" HorizontalAlignment="Left" Margin="345,99,0,0" VerticalAlignment="Top" Width="115" Height="60" FontFamily="BM DoHyeon" FontSize="20"/>
-        <Label x:Name="lbl_result" Content="" HorizontalAlignment="Left" Margin="0,6,0,0" VerticalAlignment="Top" Height="40" Width="460" HorizontalContentAlignment="Right" Foreground="Black" Background="White" FontFamily="BM DoHyeon" FontSize="30"/>
+        <Label x:Name="lbl_result" Content="" HorizontalAlignment="Left" Margin="0,6,0,0" VerticalAlignment="Top" Height="40" Width="460" HorizontalContentAlignment="Right" Foreground="Black" Background="White" FontFamily="BM DoHyeon" FontSize="13"/>
         <Label x:Name="lbl_current" Content="" HorizontalAlignment="Left" Margin="0,46,0,0" VerticalAlignment="Top" Height="53" Width="460" HorizontalContentAlignment="Right" Foreground="Black" Background="White" FontFamily="BM DoHyeon" FontSize="36"/>
     </Grid>
 </UserControl>
