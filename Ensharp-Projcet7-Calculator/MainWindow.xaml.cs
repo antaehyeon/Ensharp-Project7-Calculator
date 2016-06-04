@@ -35,6 +35,9 @@ namespace Ensharp_Projcet7_Calculator
         double first = 0;
         double second = 0;
 
+        // 전의 계산이 무엇인지 체크하
+        int BEFORE_CAL = 0;
+
         // 연산모드
         bool MODE_CAL = false;
 
@@ -77,16 +80,16 @@ namespace Ensharp_Projcet7_Calculator
             func.btn_eight.Click += btn_Num_Click;
             func.btn_nine.Click += btn_Num_Click;
 
-            func.btn_plus.Click += calButton_Click;
-            func.btn_minus.Click += calButton_Click;
-            func.btn_multiple.Click += calButton_Click;
-            func.btn_division.Click += calButton_Click;
+            func.btn_plus.Click += btn_Plus_Click;
+            func.btn_minus.Click += btn_Minus_Click;
+            func.btn_multiple.Click += btn_Multiple_Click;
+            func.btn_division.Click += btn_Division_Click;
+            func.btn_result.Click += btn_Result_Click;
 
             func.btn_c.Click += resetAll;
             func.btn_ce.Click += resetInput;
             func.btn_backspace.Click += backSpace_Click;
             func.btn_plusAndMinus.Click += plusAndMinus_Click;
-            func.btn_result.Click += result_Click;
         }
 
         // Key가 입력됬을 때 버튼이 눌리는 Event 와 똑같이 처리
@@ -143,20 +146,20 @@ namespace Ensharp_Projcet7_Calculator
                     break;
                 case Key.Add:
                 case Key.OemPlus:
-                    calculator("＋");
+                    //calculator("＋");
                     break;
                 case Key.Subtract:
                 case Key.OemMinus:
-                    calculator("-");
+                    //calculator("-");
                     break;
                 case Key.Divide:
-                    calculator("÷");
+                    //calculator("÷");
                     break;
                 case Key.Multiply:
-                    calculator("×");
+                    //calculator("×");
                     break;
                 case Key.Return:
-                    result_Click(null, null);
+                    //result_Click(null, null);
                     break;
                 case Key.C:
                     resetAll(null, null);
@@ -164,6 +167,7 @@ namespace Ensharp_Projcet7_Calculator
             }
         }
 
+        // 드래그 했을 때 창 이동시켜주는 메소드
         private void titlebar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
@@ -201,15 +205,13 @@ namespace Ensharp_Projcet7_Calculator
         // 숫자 버튼이 클릭되었을 때
         public void btn_Num_Click(object sender, RoutedEventArgs e)
         {
-            MODE_CAL = false;
-            MODE_RESULT_CONTINUES = false;
             appearNumber(((ContentControl)sender).Content.ToString());
         }
 
         // 숫자를 나타내주는 기능
         public void appearNumber(string num)
         {
-            if(MODE_CAL)
+            if (MODE_CAL)
             {
                 strOnlyNumber = "";
                 strCurrentNum = "0";
@@ -292,85 +294,222 @@ namespace Ensharp_Projcet7_Calculator
             appearNumber();
         }
 
-        // 계산쪽의 버튼을 눌렀을때 (+, -, *, ÷, =)
-        public void calButton_Click(object sender, RoutedEventArgs e)
+        public void btn_Plus_Click(object sender, RoutedEventArgs e)
         {
+            // 해당 연산모드를 가져오고
             string calMode = ((ContentControl)sender).Content.ToString();
-            calculator(calMode);
-        }
 
-        // 계산하는 메소드
-        public void calculator(string calMode)
-        {
-            // 전의 연산값을 미리 더해줌
-            if(COUNT_OPERATION > 0)
+            int compareOp = setFormula(calMode);
+
+            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
             {
-                first = second + double.Parse(strOnlyNumber);
-                func.lbl_current.Content = first;
-                strOnlyNumber = first.ToString();
-                strCurrentNum = first.ToString();
-            }
-
-            MODE_RESULT_CONTINUES = false;
-            BEFORE_MODE = setFormula(calMode);
-
-            // 이미 계산이 선택 됬다면
-            if (MODE_CAL)
-            {
-                string str = func.lbl_result.Content.ToString();
-
-                func.lbl_result.Content = func.lbl_result.Content.ToString().Remove(str.Length - 1);
-                func.lbl_result.Content += calMode;
-                currentFormula = setFormula(calMode);
-                return;
+                // 그다음에 연산결과에 +=
+                calculator(compareOp);
             }
             else
             {
-                //second = first;
-                //first = 0;
-                func.lbl_result.Content += strOnlyNumber + calMode;
+                calculator(BEFORE_CAL);
             }
 
+            // 해당모드의 연산자로 지정
+            BEFORE_CAL = compareOp;
+
+            // 입력하는 부분 위에 기록 남겨둠
+            func.lbl_result.Content += strOnlyNumber + calMode;
+
+            // 입력한 값 OnlyNumber 에 Write
+            strOnlyNumber = storeNum.ToString();
+
+            // 콤마찍어주고 화면에 보여줌
+            setComma(strOnlyNumber);
+            appearNumber();
+
+            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
             MODE_CAL = true;
 
-            if (BEFORE_MODE > 0 && COUNT_OPERATION > 0) { }
-
-            else
-            {
-                switch (calMode)
-                {
-                    case "＋":
-                        calculatorByOpeartion(PLUS);
-                        break;
-                    case "-":
-                        calculatorByOpeartion(MINUS);
-                        break;
-                    case "×":
-                        calculatorByOpeartion(MULTIPLE);
-                        break;
-                    case "÷":
-                        calculatorByOpeartion(DIVISION);
-                        break;
-                }
-            }
-
+            // 연산 횟수 증가시켜줌
             COUNT_OPERATION++;
         }
 
-        public void calculatorByOpeartion(int operation)
+        public void btn_Minus_Click(object sender, RoutedEventArgs e)
         {
-            second = double.Parse(strOnlyNumber);
+            // 해당 연산모드를 가져오고
+            string calMode = ((ContentControl)sender).Content.ToString();
 
-            if (operation.Equals(1)) { first += second; }
-            else if (operation.Equals(2)) { first -= second; }
-            else if (operation.Equals(3)) { first *= second; }
-            else if (operation.Equals(4)) { first /= second; }
+            int compareOp = setFormula(calMode);
 
-            strCurrentNum = first.ToString();
-            strOnlyNumber = first.ToString();
-            setComma(strCurrentNum);
+            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
+            {
+                // 그다음에 연산결과에 +=
+                calculator(compareOp);
+            }
+            else
+            { 
+               calculator(BEFORE_CAL);
+            }
+
+            // 이제 해당모드의 연산자로 지정
+            BEFORE_CAL = compareOp;
+
+            // 입력하는 부분 위에 기록 남겨둠
+            func.lbl_result.Content += strOnlyNumber + calMode;
+
+            // 입력한 값 OnlyNumber 에 Write
+            strOnlyNumber = storeNum.ToString();
+
+            // 콤마찍어주고 화면에 보여줌
+            setComma(strOnlyNumber);
             appearNumber();
-            currentFormula = operation;
+
+            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
+            MODE_CAL = true;
+
+            // 연산 횟수 증가시켜줌
+            COUNT_OPERATION++;
+        }
+
+        public void btn_Division_Click(object sender, RoutedEventArgs e)
+        {
+            // 해당 연산모드를 가져오고
+            string calMode = ((ContentControl)sender).Content.ToString();
+
+            int compareOp = setFormula(calMode);
+
+            if ((!strOnlyNumber.Equals("")) && storeNum.Equals(0))
+            {
+                double num = double.Parse(strOnlyNumber);
+            }
+            else if (storeNum.Equals(0) && COUNT_OPERATION.Equals(0))
+            {
+                // 이제 해당모드의 연산자로 지정
+                BEFORE_CAL = compareOp;
+
+                // 입력한 값 OnlyNumber 에 Write
+                strOnlyNumber = storeNum.ToString();
+
+                // 입력하는 부분 위에 기록 남겨둠
+                func.lbl_result.Content += strOnlyNumber + calMode;
+
+                // 콤마찍어주고 화면에 보여줌
+                setComma(strOnlyNumber);
+                appearNumber();
+
+                // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
+                MODE_CAL = true;
+
+                // 연산 횟수 증가시켜줌
+                COUNT_OPERATION++;
+
+                return;
+            }
+            
+            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
+            {
+                // 그다음에 연산결과에 +=
+                calculator(compareOp);
+            }
+            else
+            {
+                calculator(BEFORE_CAL);
+            }
+
+            // 이제 해당모드의 연산자로 지정
+            BEFORE_CAL = compareOp;
+
+            // 입력하는 부분 위에 기록 남겨둠
+            func.lbl_result.Content += strOnlyNumber + calMode;
+
+            // 입력한 값 OnlyNumber 에 Write
+            strOnlyNumber = storeNum.ToString();
+
+            // 콤마찍어주고 화면에 보여줌
+            setComma(strOnlyNumber);
+            appearNumber();
+
+            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
+            MODE_CAL = true;
+
+            // 연산 횟수 증가시켜줌
+            COUNT_OPERATION++;
+        }
+
+        public void btn_Multiple_Click(object sender, RoutedEventArgs e)
+        {
+            if(strOnlyNumber.Length > 0 && storeNum.Equals(0))
+            {
+                storeNum = 1;
+            }
+
+            // 해당 연산모드를 가져오고
+            string calMode = ((ContentControl)sender).Content.ToString();
+
+            int compareOp = setFormula(calMode);
+
+            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
+            {
+                // 그다음에 연산결과에 +=
+                calculator(compareOp);
+            }
+            else
+            {
+                calculator(BEFORE_CAL);
+            }
+
+            // 이제 해당모드의 연산자로 지정
+            BEFORE_CAL = compareOp;
+
+            // 입력하는 부분 위에 기록 남겨둠
+            func.lbl_result.Content += strOnlyNumber + calMode;
+
+            // 입력한 값 OnlyNumber 에 Write
+            strOnlyNumber = storeNum.ToString();
+
+            // 콤마찍어주고 화면에 보여줌
+            setComma(strOnlyNumber);
+            appearNumber();
+
+            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
+            MODE_CAL = true;
+
+            // 연산 횟수 증가시켜줌
+            COUNT_OPERATION++;
+        }
+
+        public void btn_Result_Click(object sender, RoutedEventArgs e)
+        {
+            // 해당 연산모드를 가져오고
+            string calMode = ((ContentControl)sender).Content.ToString();
+
+            // 이전의 연산결과를 수행한다
+            calculator(BEFORE_CAL);
+
+            strOnlyNumber = storeNum.ToString();
+
+            // 결과패널 사라지게
+            func.lbl_result.Content = "";
+
+            // 콤마찍어주고 화면에 보여줌
+            setComma(strOnlyNumber);
+            appearNumber();
+        }
+
+        public void calculator(int op)
+        {
+            switch (op)
+            {
+                case 1:
+                    storeNum += double.Parse(strOnlyNumber);
+                    break;
+                case 2:
+                    storeNum -= double.Parse(strOnlyNumber);
+                    break;
+                case 3:
+                    storeNum *= double.Parse(strOnlyNumber);
+                    break;
+                case 4:
+                    storeNum /= double.Parse(strOnlyNumber);
+                    break;
+            }
         }
 
 
@@ -387,43 +526,7 @@ namespace Ensharp_Projcet7_Calculator
 
             return 0;
         }
-        
-        // 결과 메소드
-        public void result_Click(object sender, RoutedEventArgs e)
-        {
-            // 연산이 선택되지 않았다면
-            if (currentFormula.Equals(0)) { return; }
-            else { second = double.Parse(strOnlyNumber); }
 
-            // = 연산이 이미 눌린 상태라면
-            if (MODE_RESULT_CONTINUES) { }
-            //else { second = first; }
 
-            // = 연산이 선택됬음을 체크
-            MODE_RESULT_CONTINUES = true;
-
-            switch (currentFormula)
-            {
-                case PLUS:
-                    first += second;
-                    break;
-                case MINUS:
-                    first -= second;
-                    break;
-                case MULTIPLE:
-                    first /= second;
-                    break;
-                case DIVISION:
-                    first *= second;
-                    break;
-            }
-
-            strOnlyNumber = first.ToString();
-            setComma(strOnlyNumber);
-            func.lbl_result.Content = "";
-            appearNumber();
-
-            MODE_CAL = false;
-        }
     }
 }

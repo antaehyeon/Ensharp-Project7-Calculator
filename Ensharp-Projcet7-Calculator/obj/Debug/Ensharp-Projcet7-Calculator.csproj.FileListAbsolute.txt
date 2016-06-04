@@ -15,3 +15,19 @@ C:\Users\Administrator\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Ca
 C:\Users\Administrator\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.csproj.GenerateResource.Cache
 C:\Users\Administrator\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.exe
 C:\Users\Administrator\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.pdb
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\bin\Debug\Ensharp-Projcet7-Calculator.exe.config
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.exe
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.pdb
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\bin\Debug\Ensharp-Projcet7-Calculator.exe
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\bin\Debug\Ensharp-Projcet7-Calculator.pdb
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.csprojResolveAssemblyReference.cache
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\MainWindow.g.cs
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\FunctionControl.g.cs
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\App.g.cs
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator_MarkupCompile.cache
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator_MarkupCompile.lref
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\MainWindow.baml
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\FunctionControl.baml
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.g.resources
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp_Projcet7_Calculator.Properties.Resources.resources
+C:\Users\Taehyeon AN\Documents\Ensharp-Project7-Calculator\Ensharp-Projcet7-Calculator\obj\Debug\Ensharp-Projcet7-Calculator.csproj.GenerateResource.Cache
