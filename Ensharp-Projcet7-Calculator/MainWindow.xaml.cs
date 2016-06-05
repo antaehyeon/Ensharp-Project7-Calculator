@@ -30,10 +30,7 @@ namespace Ensharp_Projcet7_Calculator
         string strOnlyNumber = "";
 
         // 실제 계산을 위한 정수형 데이터
-        double storeNum = 0;
-
-        double first = 0;
-        double second = 0;
+        double storeNum = 0.0;
 
         // 전의 계산이 무엇인지 체크하
         int BEFORE_CAL = 0;
@@ -42,13 +39,22 @@ namespace Ensharp_Projcet7_Calculator
         bool MODE_CAL = false;
 
         // = 이 연속으로 찍히는지 CHECK
-        bool MODE_RESULT_CONTINUES = false;
+        bool MODE_RESULT_CONTINUE = false;
 
         // 이전의 연산값을 알기위한 데이터
         int BEFORE_MODE = 0;
 
         // 연산이 몇번 됬는지도 체크
         int COUNT_OPERATION = 0;
+
+        // = 연산 모드 체크
+        int MODE_RESU = 0;
+
+        // 연산이 두번연속으로 눌렸을 때 원래의 값을 저장하기 위한 데이터
+        double beforeDataForResult = 0;
+
+        // 현재 값이 음수인지 체크하는 모드
+        bool MODE_NEGATIVE = false;
 
         // 수식 const
         const int PLUS = 1;
@@ -80,10 +86,10 @@ namespace Ensharp_Projcet7_Calculator
             func.btn_eight.Click += btn_Num_Click;
             func.btn_nine.Click += btn_Num_Click;
 
-            func.btn_plus.Click += btn_Plus_Click;
-            func.btn_minus.Click += btn_Minus_Click;
-            func.btn_multiple.Click += btn_Multiple_Click;
-            func.btn_division.Click += btn_Division_Click;
+            func.btn_plus.Click += btn_Operation_Click;
+            func.btn_minus.Click += btn_Operation_Click;
+            func.btn_multiple.Click += btn_Operation_Click;
+            func.btn_division.Click += btn_Operation_Click;
             func.btn_result.Click += btn_Result_Click;
 
             func.btn_c.Click += resetAll;
@@ -146,20 +152,20 @@ namespace Ensharp_Projcet7_Calculator
                     break;
                 case Key.Add:
                 case Key.OemPlus:
-                    //calculator("＋");
+                    calculatorByOperation("＋");
                     break;
                 case Key.Subtract:
                 case Key.OemMinus:
-                    //calculator("-");
+                    calculatorByOperation("-");
                     break;
                 case Key.Divide:
-                    //calculator("÷");
+                    calculatorByOperation("÷");
                     break;
                 case Key.Multiply:
-                    //calculator("×");
+                    calculatorByOperation("×");
                     break;
                 case Key.Return:
-                    //result_Click(null, null);
+                    btn_Result_Click(null, null);
                     break;
                 case Key.C:
                     resetAll(null, null);
@@ -186,20 +192,28 @@ namespace Ensharp_Projcet7_Calculator
             strCurrentNum = "";
             strOnlyNumber = "";
             storeNum = 0;
+
+            // 음수모드 초기화
+            MODE_NEGATIVE = false;
         }
 
         // 전부 초기화 해주는 기능 - C
         public void resetAll(object sender, RoutedEventArgs e)
         {
             func.lbl_result.Content = "";
+            strCurrentNum = "0";
+            strOnlyNumber = "";
+            storeNum = 0.0;
+            BEFORE_CAL = 0;
             MODE_CAL = false;
-            MODE_RESULT_CONTINUES = false;
-            currentFormula = 0;
-            first = 0;
-            second = 0;
-            resetInput(sender, e);
-
+            MODE_RESULT_CONTINUE = false;
             BEFORE_MODE = 0;
+            COUNT_OPERATION = 0;
+            MODE_RESU = 0;
+            beforeDataForResult = 0;
+            MODE_NEGATIVE = false;
+            currentFormula = 0;
+            appearNumber();
         }
 
         // 숫자 버튼이 클릭되었을 때
@@ -209,8 +223,11 @@ namespace Ensharp_Projcet7_Calculator
         }
 
         // 숫자를 나타내주는 기능
-        public void appearNumber(string num)
+        public void appearNumber(string numStr)
         {
+            // 명호 연산 해결하기 위해 (= 계속눌리고나서 새로 숫자 입력된다음에 다시 =)
+            //MODE_RESULT_CONTINUE = false;
+
             if (MODE_CAL)
             {
                 strOnlyNumber = "";
@@ -222,19 +239,26 @@ namespace Ensharp_Projcet7_Calculator
             // 더이상 숫자 입력이 되면 안될 때
             if (strOnlyNumber.Length.Equals(16)) { return; }
 
-            // 맨 처음상태라면
-            if (strCurrentNum.Equals("0"))
+            // 맨 처음상태인데, 0이 입력될경우
+            else if (strCurrentNum.Equals("0"))
             {
                 strCurrentNum = "";
+                strOnlyNumber = "";
             }
 
-            // 해당 눌린 버튼의 Content 를 추출
-            string pushedBtnContent = num;
+            else if (MODE_RESULT_CONTINUE)
+            {
+                storeNum = double.Parse(numStr);
+                strCurrentNum = "";
+                strOnlyNumber = "";
+                MODE_RESULT_CONTINUE = false;
+            }
 
             // 입력된 버튼을 string 끼리 더해줌
-            strCurrentNum += pushedBtnContent;
+            strCurrentNum += numStr;
+
             // 계산을 위해 숫자만 더해진 문자열을 따로 저장
-            strOnlyNumber += pushedBtnContent;
+            strOnlyNumber += numStr;
 
             // 숫자에 콤마를 찍어준다
             setComma(strOnlyNumber);
@@ -249,7 +273,21 @@ namespace Ensharp_Projcet7_Calculator
             if (str.Length >= 3)
             {
                 double tmpNum;
-                tmpNum = double.Parse(str);
+                tmpNum = Convert.ToDouble(str);
+
+                // 실수라면 (문자열에 . 이 없으면 -1을 반환함)
+                if(!str.IndexOf('.').Equals(-1))
+                {
+                    // 받아온 문자열을 점으로 자른다
+                    string[] result = str.Split('.');
+
+                    // 소수점 앞부분은 콤마구분을 해주기 위해서 INT형으로 변환
+                    int theFrontResult = int.Parse(result[0]);
+                    // 소수점 앞부분 콤마찍은 문자열이랑 + 콤마 + 뒤에 소수점데이터
+                    strCurrentNum = theFrontResult.ToString("#,##0") + "." + result[1];
+                    return;
+                }
+
                 strCurrentNum = tmpNum.ToString("#,##0");
             }
             else
@@ -262,16 +300,25 @@ namespace Ensharp_Projcet7_Calculator
         // 숫자의 카운트가 0 일때
         public void backSpace_Click(object sender, RoutedEventArgs e)
         {
+            // 아무것도 입력이 되지 않은 상태일 경우
             if (strOnlyNumber.Length.Equals(0))
             {
                 return;
             }
+            // 한자리만 남았을 경우
             else if (strOnlyNumber.Length.Equals(1))
             {
                 strCurrentNum = "0";
                 strOnlyNumber = "";
             }
-            else if (MODE_CAL || MODE_RESULT_CONTINUES)
+            // 두자리 남았는데 음수일경우
+            else if (strOnlyNumber.Length.Equals(2) && MODE_NEGATIVE)
+            {
+                strCurrentNum = "0";
+                strOnlyNumber = "";
+            }
+            // 연산자가 선택됬거나 =이 연속적으로 눌린 상태일 경우 뒤로가기 버튼 비활성화
+            else if (MODE_CAL || MODE_RESULT_CONTINUE)
             {
                 return;
             }
@@ -287,6 +334,10 @@ namespace Ensharp_Projcet7_Calculator
         // 음수양수 전환하는 버튼을 눌렀을 때
         public void plusAndMinus_Click(object sender, RoutedEventArgs e)
         {
+            // 음수상태에서 버튼이 다시 눌렸을 경우
+            if (MODE_NEGATIVE) { MODE_NEGATIVE = false; }
+            else { MODE_NEGATIVE = true; }
+
             storeNum = double.Parse(strCurrentNum);
             storeNum *= -1;
             strOnlyNumber = storeNum.ToString();
@@ -294,16 +345,91 @@ namespace Ensharp_Projcet7_Calculator
             appearNumber();
         }
 
-        public void btn_Plus_Click(object sender, RoutedEventArgs e)
+
+        // 연산자 버튼을 클릭했을 때
+        public void btn_Operation_Click(object sender, RoutedEventArgs e)
         {
-            // 해당 연산모드를 가져오고
             string calMode = ((ContentControl)sender).Content.ToString();
 
+            calculatorByOperation(calMode);
+        }
+
+        // 1
+        public void calculatorByOperation(string calMode)
+        {
+            // 이미 연산자가 선택된 상태라면 result label 의 연산자만 바꿔줌
+            if (MODE_CAL)
+            {
+                string str = func.lbl_result.Content.ToString();
+
+                func.lbl_result.Content = func.lbl_result.Content.ToString().Remove(str.Length - 1);
+                func.lbl_result.Content += calMode;
+                BEFORE_CAL = setFormula(calMode);
+
+                return;
+            }
+
+            // 연산자가 진짜 처음이라면 ( 프로그램 실행 후에 연산자 바로들어올시)
+            if (COUNT_OPERATION.Equals(0) && strOnlyNumber.Equals(""))
+            {
+                strOnlyNumber = "0";
+            }
+
+            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
+            MODE_CAL = true;
+
+            // 해당 연산자를 숫자로 바꿔줌
+            // 1: + 2: - 3: / 4: *
             int compareOp = setFormula(calMode);
 
+            // 연산에 따라 예외처리가 달라지므로, 분기로 나눔
+            switch (compareOp)
+            {
+                case 1: // 덧셈
+                    break;
+                case 2: // 뺄셈
+                    break;
+                case 3: // 나눗셈
+                    // 처음 연산이 아닌데, 저장되있는 숫자가 0일경우 ???
+                    // 처음 연산일 경우
+                    if (storeNum.Equals(0))
+                    {
+                        // 지금 입력된 숫자 가져와서 storeNum에 저장하고
+                        // storeNum 제곱해줌 - 나누기 한번 눌렀을 때 strCurrent에 제대로 나오게 하기위해서
+                        storeNum = double.Parse(strOnlyNumber);
+                        storeNum *= storeNum;
+                    }
+                    // 저장되있는 숫자도 0이고, 처음 연산일 때
+                    else if (storeNum.Equals(0) && COUNT_OPERATION.Equals(0))
+                    {
+                        calculatorAdditional(compareOp, calMode);
+                        return;
+                    }
+                    break;
+                case 4: // 곱셈
+                    // 처음 연산일경우
+                    if (strOnlyNumber.Length > 0 && COUNT_OPERATION.Equals(0))
+                    {
+                        // 저장되있는 숫자 1로 바꿔준다
+                        storeNum = 1;
+                    }
+                    break;
+            }
+
+            // = 가 계속 눌리고, 연산자가 선택됬다면
+            if (MODE_RESULT_CONTINUE)
+            {
+                // strOnlyNumber 에 현재 써져있는 숫자 넣어줌
+                strOnlyNumber = func.lbl_current.Content.ToString();
+                storeNum = Convert.ToDouble(strOnlyNumber);
+                MODE_RESULT_CONTINUE = false;
+                calculatorAdditional(compareOp, calMode);
+                return;
+            }
+
+            // 이전 연산결과와 같다면 || 연산자가 처음 눌렸다면
             if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
             {
-                // 그다음에 연산결과에 +=
                 calculator(compareOp);
             }
             else
@@ -311,6 +437,13 @@ namespace Ensharp_Projcet7_Calculator
                 calculator(BEFORE_CAL);
             }
 
+            // 다음 메소드로 넘어감
+            calculatorAdditional(compareOp, calMode);
+        }
+
+        // 2
+        public void calculatorAdditional(int compareOp, string calMode)
+        {
             // 해당모드의 연산자로 지정
             BEFORE_CAL = compareOp;
 
@@ -323,162 +456,56 @@ namespace Ensharp_Projcet7_Calculator
             // 콤마찍어주고 화면에 보여줌
             setComma(strOnlyNumber);
             appearNumber();
-
-            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
-            MODE_CAL = true;
-
+            
             // 연산 횟수 증가시켜줌
             COUNT_OPERATION++;
         }
 
-        public void btn_Minus_Click(object sender, RoutedEventArgs e)
+
+        // '='
+        public void btn_Result_Click(object sender, RoutedEventArgs e)
         {
-            // 해당 연산모드를 가져오고
-            string calMode = ((ContentControl)sender).Content.ToString();
-
-            int compareOp = setFormula(calMode);
-
-            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
+            // 프로그램이 아예 초기상태에서 = 이 눌린다면
+            if ((!MODE_RESULT_CONTINUE) && strOnlyNumber.Length.Equals(0))
             {
-                // 그다음에 연산결과에 +=
-                calculator(compareOp);
+                return;
             }
-            else
-            { 
-               calculator(BEFORE_CAL);
-            }
-
-            // 이제 해당모드의 연산자로 지정
-            BEFORE_CAL = compareOp;
-
-            // 입력하는 부분 위에 기록 남겨둠
-            func.lbl_result.Content += strOnlyNumber + calMode;
-
-            // 입력한 값 OnlyNumber 에 Write
-            strOnlyNumber = storeNum.ToString();
-
-            // 콤마찍어주고 화면에 보여줌
-            setComma(strOnlyNumber);
-            appearNumber();
-
-            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
-            MODE_CAL = true;
-
-            // 연산 횟수 증가시켜줌
-            COUNT_OPERATION++;
-        }
-
-        public void btn_Division_Click(object sender, RoutedEventArgs e)
-        {
-            // 해당 연산모드를 가져오고
-            string calMode = ((ContentControl)sender).Content.ToString();
-
-            int compareOp = setFormula(calMode);
-
-            if ((!strOnlyNumber.Equals("")) && storeNum.Equals(0))
+            // 이전의 연산이 없다면
+            else if (BEFORE_CAL.Equals(0)) { return; }
+            // 연산이 첫번 째 눌리는 거라면
+            else if (!MODE_RESULT_CONTINUE)
             {
-                double num = double.Parse(strOnlyNumber);
+                // 이전의 연산데이터를 가지고 있는다 우선은
+                beforeDataForResult = double.Parse(strOnlyNumber);
             }
-            else if (storeNum.Equals(0) && COUNT_OPERATION.Equals(0))
+            // 연산이 2번째 눌리는 거라면
+            else if (MODE_RESULT_CONTINUE)
             {
-                // 이제 해당모드의 연산자로 지정
-                BEFORE_CAL = compareOp;
+                // 연산모드가 아님을 알려주고
+                MODE_CAL = false;
 
-                // 입력한 값 OnlyNumber 에 Write
+                // 연산이 첫번 째 눌릴때 저장해놨던 데이터 다시가져온다
+                strOnlyNumber = beforeDataForResult.ToString();
+
+                // 이전의 연산결과를 수행한다
+                calculator(BEFORE_CAL);
+
                 strOnlyNumber = storeNum.ToString();
 
-                // 입력하는 부분 위에 기록 남겨둠
-                func.lbl_result.Content += strOnlyNumber + calMode;
+                // 결과패널 사라지게
+                func.lbl_result.Content = "";
 
                 // 콤마찍어주고 화면에 보여줌
                 setComma(strOnlyNumber);
                 appearNumber();
 
-                // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
-                MODE_CAL = true;
-
-                // 연산 횟수 증가시켜줌
-                COUNT_OPERATION++;
+                strOnlyNumber = "";
 
                 return;
             }
-            
-            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
-            {
-                // 그다음에 연산결과에 +=
-                calculator(compareOp);
-            }
-            else
-            {
-                calculator(BEFORE_CAL);
-            }
 
-            // 이제 해당모드의 연산자로 지정
-            BEFORE_CAL = compareOp;
-
-            // 입력하는 부분 위에 기록 남겨둠
-            func.lbl_result.Content += strOnlyNumber + calMode;
-
-            // 입력한 값 OnlyNumber 에 Write
-            strOnlyNumber = storeNum.ToString();
-
-            // 콤마찍어주고 화면에 보여줌
-            setComma(strOnlyNumber);
-            appearNumber();
-
-            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
-            MODE_CAL = true;
-
-            // 연산 횟수 증가시켜줌
-            COUNT_OPERATION++;
-        }
-
-        public void btn_Multiple_Click(object sender, RoutedEventArgs e)
-        {
-            if(strOnlyNumber.Length > 0 && storeNum.Equals(0))
-            {
-                storeNum = 1;
-            }
-
-            // 해당 연산모드를 가져오고
-            string calMode = ((ContentControl)sender).Content.ToString();
-
-            int compareOp = setFormula(calMode);
-
-            if (BEFORE_CAL.Equals(compareOp) || COUNT_OPERATION.Equals(0))
-            {
-                // 그다음에 연산결과에 +=
-                calculator(compareOp);
-            }
-            else
-            {
-                calculator(BEFORE_CAL);
-            }
-
-            // 이제 해당모드의 연산자로 지정
-            BEFORE_CAL = compareOp;
-
-            // 입력하는 부분 위에 기록 남겨둠
-            func.lbl_result.Content += strOnlyNumber + calMode;
-
-            // 입력한 값 OnlyNumber 에 Write
-            strOnlyNumber = storeNum.ToString();
-
-            // 콤마찍어주고 화면에 보여줌
-            setComma(strOnlyNumber);
-            appearNumber();
-
-            // 연산이 되었음을 알려줌 (숫자입력시 초기화를 위해)
-            MODE_CAL = true;
-
-            // 연산 횟수 증가시켜줌
-            COUNT_OPERATION++;
-        }
-
-        public void btn_Result_Click(object sender, RoutedEventArgs e)
-        {
-            // 해당 연산모드를 가져오고
-            string calMode = ((ContentControl)sender).Content.ToString();
+            // = 연산이 됬다고 체크
+            MODE_RESULT_CONTINUE = true;
 
             // 이전의 연산결과를 수행한다
             calculator(BEFORE_CAL);
@@ -493,6 +520,7 @@ namespace Ensharp_Projcet7_Calculator
             appearNumber();
         }
 
+
         public void calculator(int op)
         {
             switch (op)
@@ -504,14 +532,13 @@ namespace Ensharp_Projcet7_Calculator
                     storeNum -= double.Parse(strOnlyNumber);
                     break;
                 case 3:
-                    storeNum *= double.Parse(strOnlyNumber);
+                    storeNum /= double.Parse(strOnlyNumber);
                     break;
                 case 4:
-                    storeNum /= double.Parse(strOnlyNumber);
+                    storeNum *= double.Parse(strOnlyNumber);
                     break;
             }
         }
-
 
         public int setFormula(string str)
         {
@@ -519,14 +546,12 @@ namespace Ensharp_Projcet7_Calculator
                 return 1;
             else if (str.Equals("-"))
                 return 2;
-            else if (str.Equals("×"))
-                return 3;
             else if (str.Equals("÷"))
+                return 3;
+            else if (str.Equals("×"))
                 return 4;
 
             return 0;
         }
-
-
     }
 }
